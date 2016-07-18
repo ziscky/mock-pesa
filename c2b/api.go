@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"html/template"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -100,7 +101,7 @@ func (c2b *C2B) Start() {
 		}
 	}()
 
-	fmt.Println("C2B started: ", c2b.address)
+	// fmt.Println("C2B started: ", c2b.address)
 }
 
 //callClientCallBack calls the user specified callback with the method specified
@@ -156,7 +157,6 @@ func (c2b *C2B) callClientCallBack(trx *Transaction) {
 //fix Me: improve performance
 func (c2b *C2B) parseRequest(r *http.Request) http.HandlerFunc {
 	body, err := ioutil.ReadAll(r.Body)
-	fmt.Println(string(body))
 
 	processCheckoutOp := &ProcessCheckoutRequest{}
 	confirmTrxOp := &ConfirmTransactionRequest{}
@@ -167,7 +167,7 @@ func (c2b *C2B) parseRequest(r *http.Request) http.HandlerFunc {
 	err = xml.Unmarshal(body, transStatusOp)
 
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return func(rw http.ResponseWriter, r *http.Request) {
 			rw.WriteHeader(500)
 			rw.Write([]byte(err.Error()))
@@ -194,6 +194,7 @@ func (c2b *C2B) useMiddleware(middlewares ...common.Middleware) http.HandlerFunc
 	return func(rw http.ResponseWriter, r *http.Request) {
 		for _, m := range middlewares {
 			if !m(rw, r) {
+				rw.WriteHeader(400)
 				return
 			}
 			c2b.parseRequest(r)(rw, r)
@@ -205,7 +206,7 @@ func (c2b *C2B) useMiddleware(middlewares ...common.Middleware) http.HandlerFunc
 //in the WSDL is called
 func (c2b *C2B) unknownOperation(data interface{}) http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
-		rw.WriteHeader(400)
+		rw.WriteHeader(404)
 		rw.Write([]byte("Unknown Operation: " + data.(string)))
 	}
 }
@@ -218,7 +219,7 @@ func (c2b *C2B) processCheckout(data interface{}) http.HandlerFunc {
 		parsed := data.(*ProcessCheckoutRequest)
 
 		validate(rw,
-			validAuthDetails("", parsed.Header.CheckoutHeader),
+			validAuthDetails(c2b.config.SAGPasskey, parsed.Header.CheckoutHeader),
 			validMSISDN(parsed.Body.ProcessCheckout.MSISDN),
 			validCallBackURL(parsed.Body.ProcessCheckout.CallBackURL),
 			validCallBackMethod(parsed.Body.ProcessCheckout.CallBackMethod),
@@ -234,7 +235,7 @@ func (c2b *C2B) processCheckout(data interface{}) http.HandlerFunc {
 		trx.CallBackMethod = parsed.Body.ProcessCheckout.CallBackMethod
 		trx.TrxID = bson.NewObjectId().Hex()
 
-		if c2b.idExists(trx.MerchantTrxID, trx.TrxID) != nil {
+		if c2b.idExists(trx.MerchantTrxID, trx.TrxID) == nil {
 			resp := new(ProcessCheckoutResponse)
 			resp.ReturnCode = duplicateRequest
 			resp.Description = "Failed"
@@ -270,7 +271,7 @@ func (c2b *C2B) confirmTransaction(data interface{}) http.HandlerFunc {
 		code, ok := vars["code"]
 
 		validate(rw,
-			validAuthDetails("", parsed.Header.CheckoutHeader),
+			validAuthDetails(c2b.config.SAGPasskey, parsed.Header.CheckoutHeader),
 			validPassedConfirmTrxID(parsed.Body.ConfirmTransaction.TransID, parsed.Body.ConfirmTransaction.MerchantTransID),
 		)
 
@@ -314,7 +315,7 @@ func (c2b *C2B) transactionStatus(data interface{}) http.HandlerFunc {
 		parsed := data.(*TransactionStatusRequest)
 
 		validate(rw,
-			validAuthDetails("", parsed.Header.CheckoutHeader),
+			validAuthDetails(c2b.config.SAGPasskey, parsed.Header.CheckoutHeader),
 			validPassedConfirmTrxID(parsed.Body.TransactionStatus.TransID, parsed.Body.TransactionStatus.MerchantTransID),
 		)
 
@@ -350,6 +351,7 @@ func (c2b *C2B) idExists(merchID, sysID string) *Transaction {
 //Stop gracefully stops the API and the callback listener
 func (c2b *C2B) Stop() {
 	server.Close()
+	c2b.store = make(map[*Ident]interface{}) //clear map
 	c2b.callback <- nil
-	fmt.Println("C2B stopped")
+	// fmt.Println("C2B stopped")
 }
