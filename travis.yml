@@ -1,0 +1,10 @@
+language: go
+
+go:
+  - 1.6
+
+install:
+    - go get github.com/gorilla/mux
+    - go get github.com/BurntSushi/toml
+    - go get github.com/braintree/manners
+    - go get github.com/asaskevich/govalidator
