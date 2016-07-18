@@ -338,7 +338,7 @@ func (c2b *C2B) transactionStatus(data interface{}) http.HandlerFunc {
 //idExists checks if the merchant/system transaction id already exists
 func (c2b *C2B) idExists(merchID, sysID string) *Transaction {
 	c2b.lock.Lock()
-	defer c2b.lock.Lock()
+	defer c2b.lock.Unlock()
 	for k, v := range c2b.store {
 		if k.MerchTrxID == merchID || k.SysTrxID == sysID {
 			return v.(*Transaction)
