@@ -73,7 +73,7 @@ func validMerchID(merchantID string, conf common.Config) validator {
 func validAuthDetails(password string, header CheckoutHeader) validator {
 	return func() *ProcessCheckoutResponse {
 		hash := sha256.New()
-		hash.Write([]byte(fmt.Sprintf("%s%s%s", header.MerchantID, "", header.Timestamp)))
+		hash.Write([]byte(fmt.Sprintf("%s%s%s", header.MerchantID, password, header.Timestamp)))
 		password := base64.StdEncoding.EncodeToString([]byte(hex.EncodeToString(hash.Sum(nil))))
 		if password == header.Password {
 			return nil
@@ -184,7 +184,8 @@ func validPassedConfirmTrxID(sysTrx, merchTrx string) validator {
 //amount is greater than System allowed transaction amount(configurable)
 //amount is less than System allowed minimum amount(configurable)
 //amount is higher than the customer allowed daily limit
-func validAmount(amount string, conf common.Config) validator {
+//confirm -> some amount checking is only done by the Safaricom API after confirmation
+func validAmount(amount string, conf common.Config, confirm bool) validator {
 	return func() *ProcessCheckoutResponse {
 		resp := new(ProcessCheckoutResponse)
 		if len(amount) == 0 {
@@ -200,23 +201,25 @@ func validAmount(amount string, conf common.Config) validator {
 			resp.TransactionID = bson.NewObjectId().Hex()
 			return resp
 		}
-		if a > conf.MaxAmount {
-			resp.ReturnCode = maxAmountReached
-			resp.Description = "Amount above allowed maximum"
-			resp.TransactionID = bson.NewObjectId().Hex()
-			return resp
-		}
-		if a < conf.MinAmount {
-			resp.ReturnCode = minAmountReached
-			resp.Description = "Amount below allowed minimum"
-			resp.TransactionID = bson.NewObjectId().Hex()
-			return resp
-		}
-		if a > conf.MaxCustomerTransactionPerDay {
-			resp.ReturnCode = maxDailyAmountReached
-			resp.Description = "Customer max daily amount reached"
-			resp.TransactionID = bson.NewObjectId().Hex()
-			return resp
+		if confirm {
+			if a > conf.MaxAmount {
+				resp.ReturnCode = maxAmountReached
+				resp.Description = "Amount above allowed maximum"
+				resp.TransactionID = bson.NewObjectId().Hex()
+				return resp
+			}
+			if a < conf.MinAmount {
+				resp.ReturnCode = minAmountReached
+				resp.Description = "Amount below allowed minimum"
+				resp.TransactionID = bson.NewObjectId().Hex()
+				return resp
+			}
+			if a > conf.MaxCustomerTransactionPerDay {
+				resp.ReturnCode = maxDailyAmountReached
+				resp.Description = "Customer max daily amount reached"
+				resp.TransactionID = bson.NewObjectId().Hex()
+				return resp
+			}
 		}
 		return nil
 	}
