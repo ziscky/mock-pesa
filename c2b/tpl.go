@@ -26,7 +26,7 @@ var (
       <ns1:processCheckOutResponse>
          <RETURN_CODE>{{.ReturnCode}}</RETURN_CODE>
          <DESCRIPTION>{{.Description}}</DESCRIPTION>
-         <TRX_ID>{{.TransactionID}}}</TRX_ID>
+         <TRX_ID>{{.TransactionID}}</TRX_ID>
          {{if .ConfirmTrx}}
          <MERCHANT_TRANSACTION_ID>{{.MerchantTransID}}</MERCHANT_TRANSACTION_ID>
          {{else}}
@@ -53,6 +53,24 @@ var (
       <ENC_PARAMS ns1:type="xsd:string">{{.EncodedParams}}</ENC_PARAMS>    
       <TRX_ID ns1:type="xsd:string">{{.TrxID}}</TRX_ID>
       </ns1:ResultMsg>
+   </SOAP-ENV:Body>
+   </SOAP-ENV:Envelope>
+    `
+	transactionRespTPL = `
+        <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="tns:ns">
+   <SOAP-ENV:Body>
+      <ns1:transactionStatusResponse>
+      <MSISDN ns1:type="xsd:string">{{.MSISDN}}</MSISDN>
+      <AMOUNT ns1:type="xsd:string">{{.Amount}}</AMOUNT>
+      <M-PESA_TRX_DATE ns1:type="xsd:string">{{.MpesaTrxDate}}</M-PESA_TRX_DATE>
+      <M-PESA_TRX_ID ns1:type="xsd:string">{{.MpesaTrxID}}</M-PESA_TRX_ID>
+      <TRX_STATUS ns1:type="xsd:string">{{.TrxStatus}}</TRX_STATUS>
+      <RETURN_CODE ns1:type="xsd:string">{{.ReturnCode}}</RETURN_CODE>
+      <DESCRIPTION ns1:type="xsd:string">{{.Description}}</DESCRIPTION> 
+      <MERCHANT_TRANSACTION_ID ns1:type="xsd:string">{{.MerchantTrxID}}</MERCHANT_TRANSACTION_ID>       
+      <ENC_PARAMS ns1:type="xsd:string">{{.EncodedParams}}</ENC_PARAMS>    
+      <TRX_ID ns1:type="xsd:string">{{.TrxID}}</TRX_ID>
+      </ns1:transactionStatusResponse>
    </SOAP-ENV:Body>
    </SOAP-ENV:Envelope>
     `
