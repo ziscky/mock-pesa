@@ -34,8 +34,8 @@ import (
 
 	"github.com/ziscky/mock-pesa/common"
 
-	server "github.com/braintree/manners"
 	"github.com/gorilla/mux"
+	server "github.com/icub3d/graceful"
 )
 
 //Ident struct used to identify mock-pesa
@@ -57,7 +57,7 @@ type C2B struct {
 	callback chan *Transaction
 	store    map[*Ident]interface{}
 	config   common.Config
-	lock     *sync.Mutex
+	lock     sync.Mutex
 }
 
 //NewAPI returns a reference to a C2B api instance
@@ -94,14 +94,12 @@ func (c2b *C2B) Start() {
 				if trx == nil {
 					return
 				}
-				fmt.Println("Delaying by:", c2b.config.CallBackDelay)
 				time.Sleep(time.Second * time.Duration(c2b.config.CallBackDelay))
 				c2b.callClientCallBack(trx)
 			}
 		}
 	}()
 
-	// fmt.Println("C2B started: ", c2b.address)
 }
 
 //callClientCallBack calls the user specified callback with the method specified
@@ -116,7 +114,7 @@ func (c2b *C2B) callClientCallBack(trx *Transaction) {
 		data.Add("MPESA_TRX_ID", common.GenerateMpesaTrx())
 		data.Add("TRX_STATUS", trx.TrxStatus)
 		data.Add("RETURN_CODE", trx.ReturnCode)
-		data.Add("Description", trx.Description)
+		data.Add("DESCRIPTION", trx.Description)
 		data.Add("MERCHANT_TRANSACTION_ID", trx.MerchantTrxID)
 		data.Add("ENCODED_PARAMS", trx.EncodedParams)
 		data.Add("TRX_ID", trx.TrxID)
@@ -142,14 +140,19 @@ func (c2b *C2B) callClientCallBack(trx *Transaction) {
 		query.Add("MPESA_TRX_ID", common.GenerateMpesaTrx())
 		query.Add("TRX_STATUS", trx.TrxStatus)
 		query.Add("RETURN_CODE", trx.ReturnCode)
-		query.Add("Description", trx.Description)
+		query.Add("DESCRIPTION", trx.Description)
 		query.Add("MERCHANT_TRANSACTION_ID", trx.MerchantTrxID)
 		query.Add("ENCODED_PARAMS", trx.EncodedParams)
 		query.Add("TRX_ID", trx.TrxID)
+		request.URL.RawQuery = query.Encode()
 	}
 
-	resp, _ := client.Do(request)
-	fmt.Println(resp.StatusCode)
+	_, err := client.Do(request)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
 }
 
 //parseRequest emulates the SOAP style rpc call by figuring out
@@ -218,13 +221,16 @@ func (c2b *C2B) processCheckout(data interface{}) http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
 		parsed := data.(*ProcessCheckoutRequest)
 
-		validate(rw,
+		if !validate(rw,
 			validAuthDetails(c2b.config.SAGPasskey, parsed.Header.CheckoutHeader),
 			validMSISDN(parsed.Body.ProcessCheckout.MSISDN),
 			validCallBackURL(parsed.Body.ProcessCheckout.CallBackURL),
 			validCallBackMethod(parsed.Body.ProcessCheckout.CallBackMethod),
 			validMerchTrxID(parsed.Body.ProcessCheckout.MerchantTransID),
-		)
+			validAmount(parsed.Body.ProcessCheckout.Amount, c2b.config, false),
+		) {
+			return
+		}
 
 		trx := new(Transaction)
 		trx.Amount = parsed.Body.ProcessCheckout.Amount
@@ -233,9 +239,11 @@ func (c2b *C2B) processCheckout(data interface{}) http.HandlerFunc {
 		trx.EncodedParams = parsed.Body.ProcessCheckout.EncodedParams
 		trx.CallBackURL = parsed.Body.ProcessCheckout.CallBackURL
 		trx.CallBackMethod = parsed.Body.ProcessCheckout.CallBackMethod
+		trx.TrxStatus = "Success"
+		trx.ReturnCode = "00"
 		trx.TrxID = bson.NewObjectId().Hex()
 
-		if c2b.idExists(trx.MerchantTrxID, trx.TrxID) == nil {
+		if c2b.idExists(trx.MerchantTrxID, trx.TrxID) != nil {
 			resp := new(ProcessCheckoutResponse)
 			resp.ReturnCode = duplicateRequest
 			resp.Description = "Failed"
@@ -270,10 +278,12 @@ func (c2b *C2B) confirmTransaction(data interface{}) http.HandlerFunc {
 		vars := mux.Vars(r)
 		code, ok := vars["code"]
 
-		validate(rw,
+		if !validate(rw,
 			validAuthDetails(c2b.config.SAGPasskey, parsed.Header.CheckoutHeader),
 			validPassedConfirmTrxID(parsed.Body.ConfirmTransaction.TransID, parsed.Body.ConfirmTransaction.MerchantTransID),
-		)
+		) {
+			return
+		}
 
 		trx := c2b.idExists(parsed.Body.ConfirmTransaction.MerchantTransID, parsed.Body.ConfirmTransaction.TransID)
 
@@ -288,8 +298,15 @@ func (c2b *C2B) confirmTransaction(data interface{}) http.HandlerFunc {
 			return
 		}
 
+		obj := validAmount(trx.Amount, c2b.config, true)()
+		if obj != nil {
+			trx.Description = obj.Description
+			trx.ReturnCode = obj.ReturnCode
+		}
+
 		if ok {
 			trx.ReturnCode = code
+
 			if code != "00" {
 				trx.TrxStatus = "Failure"
 				trx.Description = ResolveCode(code)
@@ -314,10 +331,12 @@ func (c2b *C2B) transactionStatus(data interface{}) http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
 		parsed := data.(*TransactionStatusRequest)
 
-		validate(rw,
+		if !validate(rw,
 			validAuthDetails(c2b.config.SAGPasskey, parsed.Header.CheckoutHeader),
 			validPassedConfirmTrxID(parsed.Body.TransactionStatus.TransID, parsed.Body.TransactionStatus.MerchantTransID),
-		)
+		) {
+			return
+		}
 
 		trx := c2b.idExists(parsed.Body.TransactionStatus.MerchantTransID, parsed.Body.TransactionStatus.TransID)
 
@@ -331,7 +350,7 @@ func (c2b *C2B) transactionStatus(data interface{}) http.HandlerFunc {
 			tpl.Execute(rw, resp)
 			return
 		}
-		tpl, _ := template.New("response").Parse(callBackRespTPL)
+		tpl, _ := template.New("response").Parse(transactionRespTPL)
 		tpl.Execute(rw, trx)
 	}
 }
@@ -346,6 +365,12 @@ func (c2b *C2B) idExists(merchID, sysID string) *Transaction {
 		}
 	}
 	return nil
+}
+
+func (c2b *C2B) Clear() {
+	c2b.lock.Lock()
+	defer c2b.lock.Unlock()
+	c2b.store = make(map[*Ident]interface{})
 }
 
 //Stop gracefully stops the API and the callback listener
