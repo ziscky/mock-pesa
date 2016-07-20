@@ -8,3 +8,4 @@ install:
     - go get github.com/BurntSushi/toml
     - go get github.com/braintree/manners
     - go get github.com/asaskevich/govalidator
+    - go get github.com/icub3d/graceful
