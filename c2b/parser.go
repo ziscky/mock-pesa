@@ -99,3 +99,79 @@ type TransactionStatus struct {
 	TransID         string   `xml:"TRX_ID"`
 	MerchantTransID string   `xml:"MERCHANT_TRANSACTION_ID"`
 }
+
+//ProcessCheckOutResponse contains processCheckOutRequest operation response content
+type ProcessCheckOutResponse struct {
+	XMLName xml.Name                    `xml:"Envelope"`
+	Body    ProcessCheckOutResponseBody `xml:"Body"`
+}
+
+//ProcessCheckOutResponseBody contains the body
+type ProcessCheckOutResponseBody struct {
+	XMLName xml.Name                       `xml:"Body"`
+	Content ProcessCheckOutResponseContent `xml:"processCheckOutResponse"`
+}
+
+//ProcessCheckOutResponseContent contains the atual content
+type ProcessCheckOutResponseContent struct {
+	XMLName       xml.Name `xml:"processCheckOutResponse"`
+	ReturnCode    string   `xml:"RETURN_CODE"`
+	Description   string   `xml:"DESCRIPTION"`
+	TransactionID string   `xml:"TRX_ID"`
+	EncodedParams string   `xml:"ENC_PARAMS"`
+	CustomerMsg   string   `xml:"CUST_MSG"`
+}
+
+//CallBackResponse contains the callback response
+type CallBackResponse struct {
+	XMLName xml.Name             `xml:"Envelope"`
+	Body    CallBackResponseBody `xml:"Body"`
+}
+
+//CallBackResponseBody contains the body
+type CallBackResponseBody struct {
+	XMLName xml.Name                `xml:"Body"`
+	Content CallBackResponseContent `xml:"ResultMsg"`
+}
+
+//CallBackResponseContent contains the actual content
+type CallBackResponseContent struct {
+	XMLName       xml.Name `xml:"ResultMsg"`
+	MSISDN        string   `xml:"MSISDN"`
+	Amount        string   `xml:"AMOUNT"`
+	Date          string   `xml:"M-PESA_TRX_DATE"`
+	MpesaTrxID    string   `xml:"M-PESA_TRX_ID"`
+	TrxStatus     string   `xml:"TRX_STATUS"`
+	ReturnCode    string   `xml:"RETURN_CODE"`
+	Description   string   `xml:"DESCRIPTION"`
+	MerchantTrxID string   `xml:"MERCHANT_TRANSACTION_ID"`
+	EncodedParams string   `xml:"ENC_PARAMS"`
+	TrxID         string   `xml:"TRX_ID"`
+}
+
+//TransactionStatusResponse contains the response from the transactionStatusRequest operation
+type TransactionStatusResponse struct {
+	XMLName xml.Name                      `xml:"Envelope"`
+	Body    TransactionStatusResponseBody `xml:"Body"`
+}
+
+//TransactionStatusResponseBody contains the body
+type TransactionStatusResponseBody struct {
+	XMLName xml.Name                         `xml:"Body"`
+	Content TransactionStatusResponseContent `xml:"transactionStatusResponse"`
+}
+
+//TransactionStatusResponseContent contains the actual content
+type TransactionStatusResponseContent struct {
+	XMLName       xml.Name `xml:"transactionStatusResponse"`
+	MSISDN        string   `xml:"MSISDN"`
+	Amount        string   `xml:"AMOUNT"`
+	Date          string   `xml:"M-PESA_TRX_DATE"`
+	MpesaTrxID    string   `xml:"M-PESA_TRX_ID"`
+	TrxStatus     string   `xml:"TRX_STATUS"`
+	ReturnCode    string   `xml:"RETURN_CODE"`
+	Description   string   `xml:"DESCRIPTION"`
+	MerchantTrxID string   `xml:"MERCHANT_TRANSACTION_ID"`
+	EncodedParams string   `xml:"ENC_PARAMS"`
+	TrxID         string   `xml:"TRX_ID"`
+}
