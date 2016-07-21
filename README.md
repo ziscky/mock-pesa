@@ -36,13 +36,13 @@ OR
 
 ### Example Config
 `
-MaxAmount=70000 #Maximum amount allowed for an mpesa transaction  
-MinAmount=10 #Minimum amount allowed for an m-pesa transaction  
-MaxCustomerTransactionPerDay=150000 #Maximum amount customer allowed to transact per day  
-MerchantID="12345" #Paybill/BuyGoods  
-CallBackDelay=0 #Wait time(seconds) before your endpoint is called  
-SAGPasskey="" #SAG passkey as given by safaricom,doesn't need to be valid as long as the same is used for requests'  
-EnabledAPIS = ["c2b"] #currently only c2b, future: b2b,b2c,pbv  
+MaxAmount=70000 #Maximum amount allowed for an mpesa transaction  <br />
+MinAmount=10 #Minimum amount allowed for an m-pesa transaction  <br />
+MaxCustomerTransactionPerDay=150000 #Maximum amount customer allowed to transact per day  <br />
+MerchantID="12345" #Paybill/BuyGoods  <br />
+CallBackDelay=0 #Wait time(seconds) before your endpoint is called  <br />
+SAGPasskey="" #SAG passkey as given by safaricom,doesn't need to be valid as long as the same is used for requests' <br /> 
+EnabledAPIS = ["c2b"] #currently only c2b, future: b2b,b2c,pbv  <br />
 `
 
 ### Building From Source
