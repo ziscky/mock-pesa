@@ -35,7 +35,7 @@ OR
 `./mock-pesa -conf=/path/to/conf`  
 
 ### Example Config
-`
+```
 MaxAmount=70000  
 
 MinAmount=10  
@@ -49,7 +49,7 @@ CallBackDelay=0
 SAGPasskey="54321"  
 
 EnabledAPIS = ["c2b"]  
-`
+```
 
 ### Building From Source
 `go get github.com/ziscky/mock-pesa`  
