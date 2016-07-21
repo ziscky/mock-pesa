@@ -1,5 +1,5 @@
 # mock-pesa
-[![Coverage Status](https://coveralls.io/repos/github/ziscky/mock-pesa/badge.svg?branch=master)](https://coveralls.io/github/ziscky/mock-pesa?branch=master)
+[![Docker Repository on Quay](https://quay.io/repository/ziscky/mock-pesa)][quay]
 [![Build Status](https://goreportcard.com/badge/github.com/ziscky/zist)](https://goreportcard.com/report/github.com/ziscky/mock-pesa)
 [![Build Status](https://travis-ci.org/ziscky/zist.svg?branch=master)](https://travis-ci.org/ziscky/mock-pesa)
 [![Issue Count](https://codeclimate.com/github/ziscky/mock-pesa/badges/issue_count.svg)](https://codeclimate.com/github/ziscky/mock-pesa)
