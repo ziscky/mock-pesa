@@ -82,6 +82,9 @@ func (c2b *C2B) Start() {
 	r.HandleFunc("/{code}", c2b.useMiddleware(
 		common.CheckHeader(),
 	))
+	r.HandleFunc("/wsdl/get", func(rw http.ResponseWriter, r *http.Request) {
+		rw.Write([]byte(wsdl))
+	})
 
 	go func() {
 		server.ListenAndServe(c2b.address, r)
