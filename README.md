@@ -37,11 +37,17 @@ OR
 ### Example Config
 `
 MaxAmount=70000  
+
 MinAmount=10  
+
 MaxCustomerTransactionPerDay=150000  
+
 MerchantID="12345"  
+
 CallBackDelay=0  
-SAGPasskey="54321"   
+
+SAGPasskey="54321"  
+
 EnabledAPIS = ["c2b"]  
 `
 
