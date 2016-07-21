@@ -41,14 +41,22 @@ type api interface {
 //or returns the default settings
 func parseConf(path string) common.Config {
 	var conf common.Config
+	merchantID := os.Getenv("MERCHANT_ID")
+	passkey := os.Getenv("PASSKEY")
+	if merchantID == "" {
+		merchantID = "12345"
+	}
+	if passkey == "" {
+		passkey = "54321"
+	}
 	if _, err := toml.DecodeFile(path, &conf); err != nil {
 		fmt.Println("Failed loading conf file,using defaults.")
 		return common.Config{
 			MaxAmount:                    70000,
 			MinAmount:                    10,
-			MerchantID:                   "12345",
+			MerchantID:                   merchantID,
 			CallBackDelay:                0,
-			SAGPasskey:                   "54321",
+			SAGPasskey:                   passkey,
 			MaxCustomerTransactionPerDay: 150000,
 			EnabledAPIS:                  []string{"c2b"},
 		}
