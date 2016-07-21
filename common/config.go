@@ -34,5 +34,12 @@ type Config struct {
 
 //ToString prints a pretty representation of the conf struct
 func (conf Config) ToString() string {
-	return fmt.Sprintf("%+v", conf)
+	return fmt.Sprintf(`
+    MerchantID: %s
+    Passkey: %s
+    MaxAmount: %s
+    MinAmount: %s
+    CallBackDelay: %d
+    EnabledAPIs:%v
+    `, conf.MerchantID, conf.SAGPasskey, conf.MaxAmount, conf.MinAmount, conf.CallBackDelay, conf.EnabledAPIS)
 }
