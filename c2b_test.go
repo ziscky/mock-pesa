@@ -526,7 +526,7 @@ func TestConfirmTrx(t *testing.T) {
 
 	methods := []string{"post", "xml", "get"}
 	trxid := 0
-	p := new(c2b.ProcessCheckOutResponse)
+	p := new(c2b.ConfirmTransactionResponse)
 
 	for _, method := range methods {
 		id := startTrx(t, method, strconv.Itoa(trxid), "5500")
@@ -593,7 +593,7 @@ func TestConfirmTrxWithCode(t *testing.T) {
 	)
 	codes := []string{"33", "11", "29", "32", "34", "08", "10"}
 	trxid := 0
-	p := new(c2b.ProcessCheckOutResponse)
+	p := new(c2b.ConfirmTransactionResponse)
 
 	for _, code := range codes {
 		id := startTrx(t, "post", strconv.Itoa(trxid), "5500")
@@ -639,7 +639,7 @@ func TestConfirmTrxInvalidParams(t *testing.T) {
 		res  bytes.Buffer
 	)
 	trxid := 0
-	p := new(c2b.ProcessCheckOutResponse)
+	p := new(c2b.ConfirmTransactionResponse)
 
 	_ = startTrx(t, "post", strconv.Itoa(trxid), "5500")
 	res = testConfirmTransactionDryRun(t, merchantID, "", "")
@@ -672,7 +672,7 @@ func TestConfirmTrxInvalidIDs(t *testing.T) {
 		res  bytes.Buffer
 	)
 	trxid := 0
-	p := new(c2b.ProcessCheckOutResponse)
+	p := new(c2b.ConfirmTransactionResponse)
 
 	_ = startTrx(t, "post", strconv.Itoa(trxid), "5500")
 	res = testConfirmTransactionDryRun(t, merchantID, "invalid", "invalid")
@@ -710,7 +710,7 @@ func TestConfirmTrxInvalidAmount(t *testing.T) {
 	}
 
 	trxid := 0
-	p := new(c2b.ProcessCheckOutResponse)
+	p := new(c2b.ConfirmTransactionResponse)
 
 	for amount, expected := range scenarios {
 		id := startTrx(t, "post", strconv.Itoa(trxid), amount)
@@ -785,8 +785,9 @@ func TestTrxStatusInvalidParams(t *testing.T) {
 		resp *http.Response
 		res  bytes.Buffer
 	)
+
 	trxid := 0
-	p := new(c2b.ProcessCheckOutResponse)
+	p := new(c2b.ConfirmTransactionResponse)
 
 	startTrx(t, "post", strconv.Itoa(trxid), "5500")
 	res = testTransactionQueryDryRun(t, "", "")

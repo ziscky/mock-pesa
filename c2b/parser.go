@@ -122,6 +122,29 @@ type ProcessCheckOutResponseContent struct {
 	CustomerMsg   string   `xml:"CUST_MSG"`
 }
 
+//ConfirmTransactionResponse contains confirmTransaction operation response content
+type ConfirmTransactionResponse struct {
+	XMLName xml.Name                       `xml:"Envelope"`
+	Body    ConfirmTransactionResponseBody `xml:"Body"`
+}
+
+//ConfirmTransactionResponseBody contains the body
+type ConfirmTransactionResponseBody struct {
+	XMLName xml.Name                          `xml:"Body"`
+	Content ConfirmTransactionResponseContent `xml:"transactionConfirmResponse"`
+}
+
+//ConfirmTransactionResponseContent contains the atual content
+type ConfirmTransactionResponseContent struct {
+	XMLName       xml.Name `xml:"transactionConfirmResponse"`
+	ReturnCode    string   `xml:"RETURN_CODE"`
+	Description   string   `xml:"DESCRIPTION"`
+	MerchantTrxID string   `xml:"MERCHANT_TRANSACTION_ID"`
+	TransactionID string   `xml:"TRX_ID"`
+	EncodedParams string   `xml:"ENC_PARAMS"`
+	CustomerMsg   string   `xml:"CUST_MSG"`
+}
+
 //CallBackResponse contains the callback response
 type CallBackResponse struct {
 	XMLName xml.Name             `xml:"Envelope"`

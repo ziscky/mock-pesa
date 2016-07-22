@@ -350,7 +350,6 @@ func (c2b *C2B) transactionStatus(data interface{}) http.HandlerFunc {
 			resp.ReturnCode = transactionMismatch
 			resp.Description = "transaction details are different from original captured request details."
 			resp.TransactionID = ""
-			resp.ConfirmTrx = true
 			tpl, _ := template.New("response").Parse(processCheckOutRespTPL)
 			tpl.Execute(rw, resp)
 			return
