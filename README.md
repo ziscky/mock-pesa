@@ -59,12 +59,16 @@ EnabledAPIS = ["c2b"]
 ### How To
 Follow the official MPESA API guide, replace:  
 `Endpoint: http://localhost:7000/`  
-`WSDL: http://localhost:7000/wsdl/get`  
+`WSDL: https://safaricom.co.ke/mpesa_online/lnmo_checkout_server.php?wsdl`  
 That's right, works exactly the same  
 
 For custom scenarios e.g `Customer with insufficient funds`:  
 `Endpoint: http://localhost:7000/{code}`  
 where code is one of the official MPESA response codes,in this case: `01`  
+
+### Known Issues
+Local WSDL doesn't play well with most SOAP clients  
+Use `https://safaricom.co.ke/mpesa_online/lnmo_checkout_server.php?wsdl`
 
 ### Contiributing
 I'm very open to PRs.  
