@@ -83,7 +83,9 @@ func (c2b *C2B) Start() {
 		common.CheckHeader(),
 	))
 	r.HandleFunc("/wsdl/get", func(rw http.ResponseWriter, r *http.Request) {
-		rw.Write([]byte(wsdl))
+		r.Header.Add("Content-Type", "text/xml")
+		data := bytes.Trim([]byte(wsdl), "\n\t")
+		rw.Write(data)
 	})
 
 	go func() {
