@@ -94,15 +94,17 @@ func validMSISDN(data string) validator {
 		message := ""
 		if len(data) < 12 {
 			flag++
-			message += "Invalid MSISDN Length"
+			message += "Invalid MSISDN Length,"
 		}
-		if data[:3] != "254" {
-			flag++
-			message += "MSISDN Format 254..."
+		if len(data) > 3 {
+			if data[:3] != "254" {
+				flag++
+				message += "MSISDN Format 254...,"
+			}
 		}
 		if _, err := strconv.Atoi(data); err != nil {
 			flag++
-			message += "MSISDN not a number"
+			message += "MSISDN not a number,"
 		}
 		if flag > 0 {
 			resp := new(ProcessCheckoutResponse)
